@@ -1,19 +1,26 @@
 version: '3'
 services:
   node-1:
-    image: not-raft:latest
+    image: raft:latest
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     environment:
       - NODE_ID=a
       - NODE_PEERS=node-2:8001,node-3:8001
+      - LOG_LEVEL=trace
   node-2:
-    image: not-raft:latest
+    image: raft:latest
+    ports:
+      - "8001:8000"
     environment:
       - NODE_ID=b
       - NODE_PEERS=node-1:8001,node-3:8001
+      - LOG_LEVEL=trace
   node-3:
-    image: not-raft:latest
+    image: raft:latest
+    ports:
+      - "8002:8000"
     environment:
       - NODE_ID=c
       - NODE_PEERS=node-1:8001,node-2:8001
+      - LOG_LEVEL=trace

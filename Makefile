@@ -1,4 +1,5 @@
 build:
-	GOOS=linux GOARCH=amd64 go build -o not-raft
+	rm raft
+	GOOS=linux GOARCH=amd64 go build -o raft
 docker: build
-	docker build -f ./Dockerfile.1 -t not-raft:latest .
+	docker build --no-cache -f ./Dockerfile -t raft:latest .
