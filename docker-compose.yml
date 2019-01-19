@@ -7,7 +7,7 @@ services:
     environment:
       - NODE_ID=a
       - NODE_PEERS=node-2:8001,node-3:8001
-      - LOG_LEVEL=trace
+      - LOG_LEVEL=debug
   node-2:
     image: raft:latest
     ports:
@@ -15,7 +15,7 @@ services:
     environment:
       - NODE_ID=b
       - NODE_PEERS=node-1:8001,node-3:8001
-      - LOG_LEVEL=trace
+      - LOG_LEVEL=debug
   node-3:
     image: raft:latest
     ports:
@@ -23,4 +23,4 @@ services:
     environment:
       - NODE_ID=c
       - NODE_PEERS=node-1:8001,node-2:8001
-      - LOG_LEVEL=trace
+      - LOG_LEVEL=debug

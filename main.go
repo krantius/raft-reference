@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -54,8 +55,10 @@ func main() {
 
 	inMemStore := store.New()
 
+	ctx, cancel := context.WithCancel(context.Background())
+
 	s := &server{
-		rft:  raft.New(cfg, inMemStore),
+		rft:  raft.New(ctx, cfg, inMemStore),
 		data: inMemStore,
 	}
 
@@ -64,7 +67,7 @@ func main() {
 	r := mux.NewRouter()
 	r.Path("/kv").Methods("GET").HandlerFunc(s.status)
 	r.Path("/kv").Methods("PUT").HandlerFunc(s.put)
-	//sr.Path("/status").Methods("GET").HandlerFunc(node.Status)
+	r.Path("/status").Methods("GET").HandlerFunc(s.raftDump)
 
 	go http.ListenAndServe(":8000", r)
 
@@ -72,14 +75,7 @@ func main() {
 	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
 
 	<-c
-
-	/*
-		r := mux.NewRouter()
-		sr := r.PathPrefix("/api").Subrouter()
-		sr.Path("/status").Methods("GET").HandlerFunc(node.Status)
-
-		go http.ListenAndServe(":8000", r)
-	*/
+	cancel()
 }
 
 func (s *server) put(w http.ResponseWriter, r *http.Request) {
@@ -114,6 +110,12 @@ func (s *server) put(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) status(w http.ResponseWriter, r *http.Request) {
+	w.Write(s.data.Dump())
+}
+
+func (s *server) raftDump(w http.ResponseWriter, r *http.Request) {
+	w.Write(s.rft.Dump())
+	w.Write([]byte("\n"))
 	w.Write(s.data.Dump())
 }
 
