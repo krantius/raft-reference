@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -47,6 +48,16 @@ func main() {
 		}
 	}
 
+	httpPort := 8000
+
+	httpPortArgs := os.Getenv("HTTP_PORT")
+	if httpPortArgs != "" {
+		tport, err := strconv.Atoi(httpPortArgs)
+		if err == nil {
+			httpPort = tport
+		}
+	}
+
 	cfg := raft.Config{
 		ID:    id,
 		Port:  port,
@@ -69,7 +80,7 @@ func main() {
 	r.Path("/kv").Methods("PUT").HandlerFunc(s.put)
 	r.Path("/status").Methods("GET").HandlerFunc(s.raftDump)
 
-	go http.ListenAndServe(":8000", r)
+	go http.ListenAndServe(fmt.Sprintf(":%d", httpPort), r)
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
